@@ -41,7 +41,7 @@ class gsAPI {
         if (!empty($country)) {
             $this->country = $country;
         }
-        
+
         if (empty(self::$wsKey) || empty(self::$wsSecret)) {
             trigger_error("gsAPI class requires a valid key and secret.", E_USER_ERROR);
         }
@@ -51,17 +51,17 @@ class gsAPI {
                                'Content-Type: application/json', //don't allow endpoint to think we sent form-encoded
                                );
     }
-    
+
     public static function getInstance($key = null, $secret = null, $sessionID = null, $country = null)
     {
         if (!isset(self::$instance)) {
             $c = __CLASS__;
             self::$instance = new $c($key, $secret, $sessionID, $country);
-        }        
+        }
         return self::$instance;
     }
-    
-    /*    
+
+    /*
      * Ping Grooveshark to make sure Pickles is sleeping
      */
     public static function pingService()
@@ -366,6 +366,25 @@ class gsAPI {
                       'songIDs' => $songIDs,
                       );
         return self::makeCall('setPlaylistSongs', $args, null, false, $this->sessionID);
+    }
+
+    /*
+     * Get info and songs of a given playlistID
+     */
+    public function getPlaylist($playlistID)
+    {
+        if (!is_numeric($playlistID)) {
+            return array();
+        }
+
+        $args = array('playlistID' => (int)$playlistID);
+
+        //todo: remove this once we everything is forced dynamically
+        $sessionID = false;
+        if (isset($this) && !empty($this->sessionID)) {
+            $sessionID = $this->sessionID;
+        }
+        return self::makeCall('getPlaylist', $args);
     }
 
     /**
@@ -976,9 +995,9 @@ class gsAPI {
                       );
         return self::makeCall('markSongComplete', $args, null, false, $this->sessionID);
     }
-    
-    
-    /* 
+
+
+    /*
      * Make a call to the Grooveshark API
      */
     private static function makeCall($method, $args = array(), $resultKey = null, $https = false, $sessionID = false){
@@ -1056,7 +1075,7 @@ class gsAPI {
         }
         return $result;
     }
-    
+
     /*
      * Creates the message signature before sending to Grooveshark
      */
@@ -1085,6 +1104,6 @@ class gsAPI {
             self::$headers = $newHeaders;
         }
     }
-    
+
 }
 ?>
